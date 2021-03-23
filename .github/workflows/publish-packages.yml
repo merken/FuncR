@@ -1,0 +1,30 @@
+name: publish-packages
+
+on: 
+  workflow_dispatch:
+    inputs:
+      funcrversion:
+        description: 'FuncR Version'
+        default: '0.0.1'
+        required: true
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+      
+    - name: Setup .NET 5
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100
+        
+    - name: Build FuncR
+      run: dotnet build src/FuncR.csproj --configuration Release
+    
+    - name: Pack FuncR
+      run: dotnet pack src/FuncR.csproj --configuration Release --output ./_dist /p:Version=${{github.event.inputs.funcrversion}}
+    
+    - name: Push FuncR
+      run: dotnet nuget push ./_dist/FuncR.${{github.event.inputs.funcrversion}}.nupkg --api-key ${{secrets.NUGET_API_KEY}} -s https://api.nuget.org/v3/index.json --skip-duplicate
