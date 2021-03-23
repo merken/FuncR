@@ -26,37 +26,58 @@
 - [📝 Table of Contents](#-table-of-contents)
 - [🧐 About](#-about)
 - [🏁 Getting Started](#-getting-started)
-  - [🥇 Your first function](#-your-first-function)
-  - [🏁 Wrapping it up](#-wrapping-it-up)
 - [📜 Examples](#-examples)
 - [✍️ Authors](#️-authors)
 
 ## 🧐 About
 <a name="about"></a>
 
-**FuncR** is a small function runner, it allows you to register functions against a service interface. This is useful for cases where you feel that introducing another service into your codebase seems a bridge too far. For each service, it registers a **DispatchProxy**, this proxy will invoke all registered functions when they are called.
+**FuncR**, skip the implementations, go for functions!
+This library lets you register small **Func**'s for the methods of your Service, omitting the need for you to implement that interface in form of a class.
+FuncR will generate a **DispatchProxy** and register all **Func**'s that you provide. It also allows you to leverage existing services via DependencyInjection by providing you with the **IServiceProvider**!
 
-Main features:
+```csharp
+// We don't need no, implementation
+public interface IServiceWithoutImplementation
+{
+    string Foo(string bar);
+}
 
-- Easy setup
+class Program
+{
+    static void Main(string[] args)
+    {
+        var services = new ServiceCollection();
+
+        services.AddScopedFunction<IServiceWithoutImplementation>
+            // Implements                  string Foo(string bar)
+            (nameof(IServiceWithoutImplementation.Foo)).Runs<string, string>(bar =>
+            {
+                return $"From func '{bar}'";
+            });
+
+        var myServiceWithoutImplementation =
+            services.BuildServiceProvider().GetRequiredService<IServiceWithoutImplementation>();
+
+        // Prints: "From func 'Bar'"
+        Console.WriteLine(myServiceWithoutImplementation.Foo("Bar");
+    }
+}
+```
 
 ## 🏁 Getting Started
 <a name="getting-started"></a>
-TODO
-
-### 🥇 Your first function
-<a name="your-first-function"></a>
-TODO
-
-### 🏁 Wrapping it up
-<a name="wrapping-it-up"></a>
-TODO
+Add FuncR to your main application (.NET Web Application, Console app, ...)
+```
+dotnet add package FuncR
+```
 
 ## 📜 Examples
 <a name="examples"></a>
 
 - [🌤️ Your first function](https://github.com/merken/FuncR/tree/main/samples/Your.First.Function)
 - [🧮 Calculator app](https://github.com/merken/FuncR/tree/main/samples/Calculator)
+- [♻️ Funception](https://github.com/merken/FuncR/tree/main/samples/Funception)
 
 ## ✍️ Authors
 <a name="authors"></a>

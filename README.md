@@ -5,7 +5,7 @@ alt="FuncR Logo" width="65" height="65" style="float:left; padding-right:15px;" 
 
 <br/>
 
-**FuncR**, small function runner
+**FuncR**, skip the implementations, go for functions!
 
 [![GitHub Issues](https://img.shields.io/github/issues/merken/FuncR?style=flat-square)](https://github.com/merken/FuncR/issues)<br/>
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/merken/FuncR?style=flat-square)](https://github.com/merken/FuncR/pulls)<br/>
@@ -19,9 +19,7 @@ alt="FuncR Logo" width="65" height="65" style="float:left; padding-right:15px;" 
 
 <br/>
 
-![alt text](https://img.shields.io/github/workflow/status/merken/FuncR/FuncR-build?label=FuncR%20Build&style=flat-square)</br>
+![alt text](https://img.shields.io/github/workflow/status/merken/FuncR/funcr-build?label=FuncR%20Build&style=flat-square)</br>
 
 ## 📦 Latest version
-| &nbsp; | &nbsp; |
-| -- | -- |
-| [![NuGet Badge](https://img.shields.io/nuget/v/FuncR?label=FuncR&style=flat-square)](https://www.nuget.org/packages/FuncR/) 
+[![NuGet Badge](https://img.shields.io/nuget/v/FuncR?label=FuncR&style=flat-square)](https://www.nuget.org/packages/FuncR/) 
