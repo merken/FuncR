@@ -5,9 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\FuncR.csproj" />
     <ProjectReference Include="..\Calculator.Core\Calculator.Core.csproj" />
     <ProjectReference Include="..\Calculator.Domain\Calculator.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FuncR" Version="0.0.1" />
   </ItemGroup>
 
 </Project>
