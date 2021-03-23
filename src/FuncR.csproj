@@ -7,7 +7,6 @@
     <Authors>Maarten Merken</Authors>
     <Company>MRKN</Company>
     <PackageTags>function;dispatchproxy;proxy</PackageTags>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     <LangVersion>9</LangVersion>
   </PropertyGroup>
 

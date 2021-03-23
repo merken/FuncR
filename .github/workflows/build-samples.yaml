@@ -1,4 +1,4 @@
-name: prise-build-samples
+name: funcr-build-samples
 
 on: [push, pull_request]
 
