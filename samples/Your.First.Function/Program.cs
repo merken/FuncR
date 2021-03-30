@@ -17,8 +17,9 @@ namespace Your.First.Function
             var services = new ServiceCollection();
 
             services.AddScopedFunction<IFooService>
-                // Implements                  string Foo(int numberOfFoos)
-                (nameof(IFooService.Foo)).Runs<int, string>(numberOfFoos =>
+                (nameof(IFooService.Foo))
+                // string Foo(int numberOfFoos)
+                .Runs<int, string>(numberOfFoos =>
                 {
                     if(numberOfFoos >= 5)
                         return "Too many foos!";
