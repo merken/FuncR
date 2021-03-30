@@ -4,9 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Your.First.Function
 {
-    public interface IServiceWithoutImplementation
+    // We don't need no, implementation
+    public interface IFooService
     {
-        string Foo(string bar);
+        string Foo(int numberOfFoos);
     }
 
     class Program
@@ -14,18 +15,24 @@ namespace Your.First.Function
         static void Main(string[] args)
         {
             var services = new ServiceCollection();
-            services.AddScopedFunction<IServiceWithoutImplementation>
-                // Implements                  string Foo(string bar)
-                (nameof(IServiceWithoutImplementation.Foo)).Runs<string, string>(bar =>
+
+            services.AddScopedFunction<IFooService>
+                // Implements                  string Foo(int numberOfFoos)
+                (nameof(IFooService.Foo)).Runs<int, string>(numberOfFoos =>
                 {
-                    return $"From func '{bar}'";
+                    if(numberOfFoos >= 5)
+                        return "Too many foos!";
+
+                    return $"This many foos: '{numberOfFoos}'";
                 });
 
-            var myServiceWithoutImplementation =
-                services.BuildServiceProvider().GetRequiredService<IServiceWithoutImplementation>();
+            var fooService =
+                services.BuildServiceProvider().GetRequiredService<IFooService>();
 
-            // Prints: "From func 'Bar'"
-            Console.WriteLine(myServiceWithoutImplementation.Foo("Bar"));
+            // Prints: "This many foos: '3'"
+            Console.WriteLine(fooService.Foo(3));
+            // Prints: "Too many foos!"
+            Console.WriteLine(fooService.Foo(5));
         }
     }
 }

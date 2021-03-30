@@ -18,7 +18,7 @@
 
 ---
 
-<p align="center"> FuncR, small function runner
+<p align="center">From interfaces to functions, with FuncR!
     <br/> 
 </p>
 
@@ -26,6 +26,12 @@
 - [📝 Table of Contents](#-table-of-contents)
 - [🧐 About](#-about)
 - [🏁 Getting Started](#-getting-started)
+  - [Scoped function](#scoped-function)
+  - [Singleton function](#singleton-function)
+  - [Async function](#async-function)
+  - [Inject services into a function](#inject-services-into-a-function)
+  - [Using a function within a function](#using-a-function-within-a-function)
+  - [Local functions](#local-functions)
 - [📜 Examples](#-examples)
 - [✍️ Authors](#️-authors)
 
@@ -33,14 +39,14 @@
 <a name="about"></a>
 
 **FuncR**, skip the implementations, go for functions!
-This library lets you register small **Func**'s for the methods of your Service, omitting the need for you to implement that interface in form of a class.
+This library lets you register small **Func**'s for the methods of your Service interface, omitting the need for you to implement that interface in form of a class.
 FuncR will generate a **DispatchProxy** and register all **Func**'s that you provide. It also allows you to leverage existing services via DependencyInjection by providing you with the **IServiceProvider**!
 
 ```csharp
 // We don't need no, implementation
-public interface IServiceWithoutImplementation
+public interface IFooService
 {
-    string Foo(string bar);
+    string Foo(int numberOfFoos);
 }
 
 class Program
@@ -49,18 +55,23 @@ class Program
     {
         var services = new ServiceCollection();
 
-        services.AddScopedFunction<IServiceWithoutImplementation>
-            // Implements                  string Foo(string bar)
-            (nameof(IServiceWithoutImplementation.Foo)).Runs<string, string>(bar =>
+        services.AddScopedFunction<IFooService>
+            // Implements                  string Foo(int numberOfFoos)
+            (nameof(IFooService.Foo)).Runs<int, string>(numberOfFoos =>
             {
-                return $"From func '{bar}'";
+                if(numberOfFoos >= 5)
+                    return "Too many foos!";
+
+                return $"This many foos: '{numberOfFoos}'";
             });
 
-        var myServiceWithoutImplementation =
-            services.BuildServiceProvider().GetRequiredService<IServiceWithoutImplementation>();
+        var fooService =
+            services.BuildServiceProvider().GetRequiredService<IFooService>();
 
-        // Prints: "From func 'Bar'"
-        Console.WriteLine(myServiceWithoutImplementation.Foo("Bar");
+        // Prints: "This many foos: '3'"
+        Console.WriteLine(fooService.Foo(3));
+        // Prints: "Too many foos!"
+        Console.WriteLine(fooService.Foo(5));
     }
 }
 ```
@@ -70,6 +81,222 @@ class Program
 Add FuncR to your main application (.NET Web Application, Console app, ...)
 ```
 dotnet add package FuncR
+```
+
+### Scoped function
+Add a new ```scoped``` function to your service collection:
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddScopedFunction<MyServiceInterface>
+        ("name of the method you want to create a function for")
+        .Runs<TParameter1Type, TReturnType>(
+            (parameter1) =>
+            {
+                TReturnType value = default(TReturnType);
+                return value;
+            });
+}
+```
+
+Example:
+```csharp
+public interface IFooService
+{
+    string Foo(int numberOfFoos);
+}
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddScopedFunction<IFooService>
+            ("Foo")
+            .Runs<int, string>(
+                numberOfFoos =>
+                {
+                    if(numberOfFoos >= 5)
+                        return "Too many foos!";
+
+                    return $"This many foos: '{numberOfFoos}'";
+                });
+}
+```
+
+Best to use the actual name of the method instead of ```("Foo")```:
+```csharp
+public interface IFooService
+{
+    string Foo(int numberOfFoos);
+}
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddScopedFunction<IFooService>
+            (nameof(IFooService.Foo)) // Better
+            .Runs<int, string>(
+                numberOfFoos =>
+                {
+                    if(numberOfFoos >= 5)
+                        return "Too many foos!";
+
+                    return $"This many foos: '{numberOfFoos}'";
+                });
+}
+```
+
+### Singleton function
+Using a singleton function, as an alternative for a static class + method.
+```csharp
+public interface IFooService
+{
+    string Foo(int numberOfFoos);
+}
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddSingletonFunction<IFooService>
+            (nameof(IFooService.Foo))
+            .Runs<int, string>(
+                numberOfFoos =>
+                {
+                    if(numberOfFoos >= 5)
+                        return "Too many foos!";
+
+                    return $"This many foos: '{numberOfFoos}'";
+                });
+}
+```
+
+
+### Async function
+Using a singleton function, as an alternative for a static class + method.
+```csharp
+public interface IFooService
+{
+    Task<string> Foo(int numberOfFoos);
+}
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddSingletonFunction<IFooService>
+            (nameof(IFooService.Foo))
+            .Runs<int, string>(
+                async numberOfFoos =>
+                {
+                    // async operation
+                    await Task.Delay(1000);
+
+                    if(numberOfFoos > 5)
+                        return "Too many foos!";
+
+                    return $"This many foos: '{numberOfFoos}'";
+                });
+}
+```
+
+### Inject services into a function
+Make use of dependency injection to resolve services inside a function.
+```csharp
+public interface IFooLogic
+{
+    bool IsTooMany(int numberOfFoos);
+}
+
+public class FooLogic : IFooLogic
+{
+    public bool IsTooMany(int numberOfFoos)
+    {
+        return numberOfFoos >= 5;
+    }
+}
+
+public interface IFooService
+{
+    Task<string> Foo(int numberOfFoos);
+}
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddScopedFunction<IFooService>
+            (nameof(IFooService.Foo))
+            .Runs<IServiceProvider, int, string>(
+                async (serviceProvider, numberOfFoos) =>
+                {
+                    await Task.Delay(1000);
+                    
+                    // Resolve the IFooLogic via the IServiceProvider
+                    var fooLogic = serviceProvider.GetRequiredService<IFooLogic>();
+                    var isTooMany = fooLogic.IsTooMany(numberOfFoos);
+
+                    if(isTooMany)
+                        return "Too many foos!";
+
+                    return $"This many foos: '{numberOfFoos}'";
+                });
+}
+```
+
+### Using a function within a function
+The injected service can also be a registered function!
+
+```csharp
+public interface IFooLogic
+{
+    bool IsTooMany(int numberOfFoos);
+}
+
+public interface IFooService
+{
+    Task<string> Foo(int numberOfFoos);
+}
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddScopedFunction<IFooLogic>
+            (nameof(IFooService.IsTooMany))
+            .Runs<int, bool>(
+                async (serviceProvider, numberOfFoos) =>
+                {
+                    return numberOfFoos >= 5;
+                });
+
+    services.AddScopedFunction<IFooService>
+            (nameof(IFooService.Foo))
+            .Runs<IServiceProvider, int, string>(
+                async (serviceProvider, numberOfFoos) =>
+                {
+                    await Task.Delay(1000);
+                    
+                    var fooLogic = serviceProvider.GetRequiredService<IFooLogic>();
+                    var isTooMany = fooLogic.IsTooMany(numberOfFoos);
+
+                    if(isTooMany)
+                        return "Too many foos!";
+
+                    return $"This many foos: '{numberOfFoos}'";
+                });
+}
+```
+
+
+### Local functions
+You can also make use of C# local functions.
+```csharp
+public interface IFooService
+{
+    string Foo(int numberOfFoos);
+}
+
+public void ConfigureServices(IServiceCollection services)
+{
+    string LocalFoo(int numberOfFoos)
+    {
+        return $"This many foos: '{numberOfFoos}'";
+    }
+
+    services.AddScopedFunction<IFooService>
+            (nameof(IFooService.Foo))
+            .Runs<int, string>(LocalFoo);
+}
 ```
 
 ## 📜 Examples
