@@ -5,6 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FuncR" Version="0.0.1" />
+    <PackageReference Include="FuncR" Version="1.0.0" />
   </ItemGroup>
 </Project>
