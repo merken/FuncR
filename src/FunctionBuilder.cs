@@ -36,12 +36,18 @@ namespace FuncR
             {
                 var callingMethodParameters = parameters;
                 var targetMethodParameters = targetMethod.GetParameters();
+
+                if (0 == callingMethodParameters.Count() && 0 == targetMethodParameters.Count())
+                    return true;
+
+                if (callingMethodParameters.Count() != targetMethodParameters.Count())
+                    return false;
+
                 for (var index = 0; index < callingMethodParameters.Count(); index++)
                 {
                     var callingParam = callingMethodParameters[index];
                     var targetParam = targetMethodParameters[index];
-                    if (!(targetParam.Name == callingParam.Name &&
-                          targetParam.ParameterType.Name == callingParam.ParameterType.Name))
+                    if (targetParam.ParameterType != callingParam.ParameterType)
                         return false;
                 }
 

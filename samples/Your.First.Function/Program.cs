@@ -19,12 +19,12 @@ namespace Your.First.Function
             services.AddScopedFunction<IFooService>
                 (nameof(IFooService.Foo))
                 // string Foo(int numberOfFoos)
-                .Runs<int, string>(numberOfFoos =>
+                .Runs<int, string>(n =>
                 {
-                    if(numberOfFoos >= 5)
+                    if(n >= 5)
                         return "Too many foos!";
 
-                    return $"This many foos: '{numberOfFoos}'";
+                    return $"This many foos: '{n}'";
                 });
 
             var fooService =
